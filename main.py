@@ -1,13 +1,34 @@
 import streamlit as st
 import datetime as dt
 
-from config import SCHEMES
 from queries import SIMULATION_QUERY
 from db import fetch_dataframe
 
-# =====================================================
+SCHEMES = {
+    "Skema 1": {
+        "gapok": 90000,
+        "max_salary": 150000,
+        "bonus_threshold": 1_000_000
+    },
+    "Skema 2": {
+        "gapok": 90000,
+        "max_salary": 140000,
+        "bonus_threshold": 1_000_000
+    },
+    "Skema 3": {
+        "gapok": 90000,
+        "max_salary": 130000,
+        "bonus_threshold": 1_000_000
+    },
+    "Skema 4": {
+        "gapok": 100000,
+        "max_salary": 200000,
+        "bonus_threshold": 1_300_000
+    }
+}
+
+
 # PAGE CONFIG
-# =====================================================
 st.set_page_config(
     page_title="Simulasi Penggajian – Branch Bekasi",
     layout="wide"
@@ -15,9 +36,7 @@ st.set_page_config(
 
 st.title("Simulasi Penggajian – Branch Bekasi")
 
-# =====================================================
 # SIDEBAR FILTER
-# =====================================================
 branch = "Jakarta"
 
 st.sidebar.header("Filter Simulasi")
@@ -44,9 +63,7 @@ days = st.sidebar.slider(
 start_date = dt.date(2025, 11, 1)
 end_date = start_date + dt.timedelta(days=days - 1)
 
-# =====================================================
 # SCHEME LOGIC
-# =====================================================
 if scheme_name == "Custom":
     st.sidebar.subheader("Skema Custom")
 
@@ -80,9 +97,7 @@ else:
     bonus_threshold = scheme["bonus_threshold"]
     bonus = max_salary - gapok
 
-# =====================================================
 # SCHEME SUMMARY
-# =====================================================
 st.subheader(f"Ringkasan Skema – {scheme_name}")
 
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -93,9 +108,7 @@ col3.metric("Target Sales Bonus", f"Rp {bonus_threshold:,.0f}")
 col4.metric("Max Salary / Hari", f"Rp {max_salary:,.0f}")
 col5.metric("Periode", f"{days} Hari")
 
-# =====================================================
 # LOAD DATA
-# =====================================================
 params = {
     "branch": branch,
     "start_date": start_date,
@@ -112,9 +125,7 @@ if df.empty:
     st.warning("Data kosong untuk filter yang dipilih")
     st.stop()
 
-# =====================================================
 # RANGE TOTAL SALARY
-# =====================================================
 st.subheader("Range Total Salary")
 
 min_total_salary = gapok * days
@@ -134,9 +145,7 @@ col2.metric(
     help="Max salary × jumlah hari (semua hari dapat bonus)"
 )
 
-# =====================================================
 # DISTRIBUSI BONUS
-# =====================================================
 st.subheader("Distribusi Bonus")
 
 bonus_dist = (
@@ -151,9 +160,7 @@ bonus_dist["persentase"] = (
 
 st.dataframe(bonus_dist, use_container_width=True)
 
-# =====================================================
 # TOTAL SUMMARY
-# =====================================================
 st.subheader("Ringkasan Total")
 
 total_sales = df["sales"].sum()
@@ -168,9 +175,7 @@ col2.metric("Total Salary (Tanpa OS)", f"Rp {total_no_os:,.0f}")
 col3.metric("Total Salary (OS 8%)", f"Rp {total_os_8:,.0f}")
 col4.metric("Total Salary (OS 10%)", f"Rp {total_os_10:,.0f}")
 
-# =====================================================
 # SALARY COST
-# =====================================================
 st.subheader("Salary Cost")
 
 col1, col2, col3 = st.columns(3)
@@ -179,9 +184,7 @@ col1.metric("Tanpa OS", f"{total_no_os / total_sales:.2%}")
 col2.metric("Dengan OS 8%", f"{total_os_8 / total_sales:.2%}")
 col3.metric("Dengan OS 10%", f"{total_os_10 / total_sales:.2%}")
 
-# =====================================================
 # DETAIL TABLE
-# =====================================================
 with st.expander("Detail Harian", expanded=False):
     st.dataframe(
         df.sort_values(["tanggal", "outlet"]),

@@ -1,7 +1,8 @@
 import streamlit as st
 import datetime as dt
 
-from config import SCHEMES
+# from config import SCHEMES
+from schemes import SCHEMES
 from queries import SIMULATION_QUERY
 from db import fetch_dataframe
 
